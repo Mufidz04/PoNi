@@ -56,7 +56,7 @@ fun AlumniFormScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text("Add Data Alumni") }
+                title = { Text(if (alumniId == null) "Add Data Alumni" else "Edit Data Alumni") }
             )
         },
         content = { innerPadding ->
@@ -172,13 +172,15 @@ fun AlumniFormScreen(
                                 errorMessage = "All fields must be filled!"
                             } else {
                                 val alumniItem = AlumniItem(
+                                    id = alumni?.id ?: 0, // Use existing ID if editing
                                     nim = nim.toIntOrNull() ?: 0,
                                     name = namaAlumni,
                                     tempatLahir = tempatLahir,
-                                    tanggalLahir = (tanggalLahir.toIntOrNull() ?: 0).toString(),
+                                    tanggalLahir = tanggalLahir,
                                     alamat = address,
                                     agama = agama,
-                                    noHp = (noHp.toIntOrNull() ?: 0).toString(),
+                                    noHp = noHp,
+                                    email = alumni?.email ?: "",
                                     tahunMasuk = tahunMasuk.toIntOrNull() ?: 0,
                                     tahunLulus = tahunLulus.toIntOrNull() ?: 0,
                                     pekerjaan = pekerjaan,
@@ -187,7 +189,11 @@ fun AlumniFormScreen(
 
                                 coroutineScope.launch {
                                     try {
-                                        viewModel.insert(alumniItem)
+                                        if (alumniId == null) {
+                                            viewModel.insert(alumniItem)
+                                        } else {
+                                            viewModel.update(alumniItem)
+                                        }
                                         navController.popBackStack()
                                     } catch (e: Exception) {
                                         errorMessage = "Failed to save data: ${e.localizedMessage}"
@@ -195,6 +201,7 @@ fun AlumniFormScreen(
                                 }
                             }
                         },
+
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Save")
